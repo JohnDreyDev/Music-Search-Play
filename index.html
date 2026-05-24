@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Music Search & Play</title>
+    <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+    <div class="app-shell">
+        <header class="hero">
+            <h1>Music Search</h1>
+            <p>Search songs and play them instantly.</p>
+            <div class="search-box">
+                <input id="searchInput" type="search" placeholder="Search by title, artist, or genre" />
+                <button id="searchButton">Search</button>
+            </div>
+            <div class="search-controls">
+                <label for="sourceFilter">Search source</label>
+                <select id="sourceFilter">
+                    <option value="all">All sources</option>
+                    <option value="library">Library + Uploads</option>
+                    <option value="itunes">iTunes previews</option>
+                </select>
+            </div>
+            <p class="search-hint">Search iTunes previews, uploaded songs, or both. Drag audio files into the app to upload.</p>
+        </header>
+
+        <main>
+            <section class="results-panel">
+                <h2>Song Library</h2>
+                <p class="result-count" id="resultCount">Showing 0 songs</p>
+                <p class="result-note">Search iTunes previews or upload your own full songs for playback.</p>
+                <ul id="songList" class="song-list"></ul>
+            </section>
+
+            <section class="player-panel">
+                <div class="player-card">
+                    <div class="player-header">
+                        <h2>Now Playing</h2>
+                        <div class="now-playing-info">
+                            <p id="nowPlayingTitle">Select a song from the list</p>
+                            <p id="nowPlayingArtist"></p>
+                        </div>
+                    </div>
+
+                    <audio id="audioPlayer" controls preload="none">
+            Your browser does not support the audio element.
+          </audio>
+
+                    <div class="player-actions">
+                        <button id="queueButton" class="primary" disabled>Add to Queue</button>
+                        <a id="downloadButton" class="download-button disabled" href="#" download>Download</a>
+                    </div>
+
+                    <div class="upload-box">
+                        <label for="fileUpload">Upload your own songs</label>
+                        <input id="fileUpload" type="file" accept="audio/*" multiple />
+                        <p class="upload-hint">Uploaded songs are played in full and can be added to your queue.</p>
+                    </div>
+
+                    <div class="queue-card">
+                        <div class="queue-header">
+                            <h3>Playlist Queue</h3>
+                            <p id="queueCount">0 tracks queued</p>
+                        </div>
+                        <ul id="queueList" class="queue-list"></ul>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <div id="dropOverlay" class="drop-overlay">Drop audio files here to upload</div>
+    <script src="script.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,452 @@
+:root {
+    --bg: #090b16;
+    --card: #111827;
+    --text: #e5e7eb;
+    --accent: #7c3aed;
+    --muted: #94a3b8;
+    --border: rgba(255, 255, 255, 0.08);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    min-height: 100%;
+    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: radial-gradient(circle at top, rgba(124, 58, 237, 0.15), transparent 40%), radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.15), transparent 35%), var(--bg);
+    color: var(--text);
+}
+
+body {
+    padding: 24px;
+}
+
+.app-shell {
+    max-width: 1080px;
+    margin: 0 auto;
+}
+
+.hero {
+    padding: 32px;
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(12px);
+    text-align: center;
+}
+
+.hero h1 {
+    margin: 0;
+    font-size: clamp(2.5rem, 4vw, 4rem);
+}
+
+.hero p {
+    color: var(--muted);
+    margin: 16px auto 24px;
+    max-width: 720px;
+}
+
+.search-box {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.search-hint {
+    margin-top: 14px;
+    color: var(--muted);
+    font-size: 0.95rem;
+}
+
+.search-controls {
+    margin-top: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.search-controls label {
+    color: var(--muted);
+    font-size: 0.95rem;
+}
+
+.search-controls select {
+    padding: 12px 16px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text);
+    outline: none;
+}
+
+.search-box input {
+    width: min(420px, 100%);
+    padding: 14px 16px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text);
+    outline: none;
+}
+
+.drop-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(15, 23, 42, 0.9);
+    color: white;
+    font-size: 1.25rem;
+    text-align: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 1000;
+}
+
+body.dragging .drop-overlay {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+@media (max-width: 860px) {
+    main {
+        grid-template-columns: 1fr;
+    }
+    .player-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .player-actions button,
+    .download-button,
+    .search-controls select,
+    .search-box input,
+    .search-box button {
+        width: 100%;
+    }
+    .song-item {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .song-actions {
+        justify-content: space-between;
+        width: 100%;
+    }
+    .queue-item {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .queue-item button {
+        width: 100%;
+    }
+}
+
+@media (max-width: 560px) {
+    .hero {
+        padding: 24px 18px;
+    }
+    .results-panel,
+    .player-panel {
+        padding: 18px;
+    }
+    .search-box {
+        gap: 10px;
+    }
+    .search-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+
+.search-box input:focus {
+    border-color: #a78bfa;
+    box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.12);
+}
+
+.search-box button {
+    padding: 14px 24px;
+    border: none;
+    border-radius: 999px;
+    background: var(--accent);
+    color: white;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.result-note {
+    color: var(--muted);
+    margin: 0 0 16px;
+}
+
+.player-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+}
+
+.player-actions button,
+.download-button {
+    border: none;
+    border-radius: 999px;
+    padding: 12px 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.player-actions button.primary {
+    background: var(--accent);
+    color: white;
+}
+
+.download-button {
+    text-decoration: none;
+    background: #1f2937;
+    color: var(--text);
+}
+
+.download-button.disabled,
+.player-actions button:disabled {
+    opacity: 0.45;
+    pointer-events: none;
+}
+
+.upload-box {
+    margin-top: 22px;
+    padding: 18px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.upload-box label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.upload-box input {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text);
+    outline: none;
+}
+
+.upload-hint {
+    margin: 12px 0 0;
+    color: var(--muted);
+    font-size: 0.93rem;
+}
+
+.queue-card {
+    margin-top: 22px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 18px;
+}
+
+.queue-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.queue-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+    max-height: 320px;
+    overflow: auto;
+}
+
+.queue-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.queue-item p {
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+.queue-item button {
+    border: none;
+    border-radius: 999px;
+    background: #111827;
+    color: white;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.queue-item button:hover {
+    background: #1f2937;
+}
+
+.tag {
+    display: inline-flex;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    background: rgba(99, 102, 241, 0.16);
+    color: #c7d2fe;
+    margin-left: 6px;
+}
+
+main {
+    display: grid;
+    grid-template-columns: 1.35fr 1fr;
+    gap: 24px;
+    margin-top: 32px;
+}
+
+.results-panel,
+.player-panel {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 24px;
+}
+
+.results-panel h2,
+.player-panel h2 {
+    margin-top: 0;
+}
+
+.result-count {
+    color: var(--muted);
+    margin-bottom: 16px;
+}
+
+.song-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 14px;
+}
+
+.song-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    border-radius: 18px;
+    border: 1px solid transparent;
+    background: rgba(255, 255, 255, 0.03);
+    transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+
+.song-item:hover {
+    transform: translateY(-1px);
+    border-color: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.song-meta {
+    flex: 1;
+    min-width: 0;
+}
+
+.song-meta p {
+    margin: 0;
+}
+
+.song-title {
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.song-subtitle {
+    color: var(--muted);
+    margin-top: 4px;
+    font-size: 0.95rem;
+}
+
+.song-source {
+    color: #a5b4fc;
+    margin-left: 8px;
+    font-size: 0.85rem;
+}
+
+.song-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.song-actions button {
+    border: none;
+    border-radius: 999px;
+    padding: 10px 16px;
+    background: #1f2937;
+    color: var(--text);
+    cursor: pointer;
+    transition: background 0.18s ease;
+}
+
+.song-actions button:hover {
+    background: #374151;
+}
+
+.player-card {
+    display: grid;
+    gap: 18px;
+}
+
+.now-playing-info {
+    padding: 18px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.now-playing-info p {
+    margin: 0;
+}
+
+#nowPlayingTitle {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+#nowPlayingArtist {
+    color: var(--muted);
+}
+
+audio {
+    width: 100%;
+    border-radius: 16px;
+}
+
+.player-help {
+    color: var(--muted);
+    font-size: 0.95rem;
+}
+
+@media (max-width: 900px) {
+    main {
+        grid-template-columns: 1fr;
+    }
+}
