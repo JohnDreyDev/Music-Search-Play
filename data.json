@@ -1,65 +1,89 @@
 {
-    "tracks": [{
-            "id": 1,
-            "title": "Sample Track",
-            "artist": "Unknown",
-            "genre": "Electronic",
-            "duration": 180,
-            "url": "/tracks/sample.mp3"
-        },
-        {
-            "id": 2,
-            "title": "Morning Vibes",
-            "artist": "Chill Beats",
-            "genre": "Ambient",
-            "duration": 240,
-            "url": "/tracks/morning.mp3"
-        },
-        {
-            "id": 3,
-            "title": "Energy Boost",
-            "artist": "Synth Wave",
-            "genre": "Synthwave",
-            "duration": 200,
-            "url": "/tracks/energy.mp3"
-        },
-        {
-            "id": 4,
-            "title": "New Song",
-            "artist": "Artist Name",
-            "genre": "Pop",
-            "duration": 0,
-            "url": ""
-        }
-    ],
-    "playlists": [{
-            "id": 1,
-            "name": "Favorites",
-            "description": "My favorite tracks",
-            "trackIds": [
-                1,
-                2
-            ],
-            "createdAt": "2026-05-24T00:00:00Z"
-        },
-        {
-            "id": 2,
-            "name": "Workout Mix",
-            "description": "High energy tracks",
-            "trackIds": [
-                3
-            ],
-            "createdAt": "2026-05-24T00:00:00Z"
-        },
-        {
-            "id": 3,
-            "name": "My List",
-            "description": "",
-            "trackIds": [
-                1,
-                2
-            ],
-            "createdAt": "2026-05-24T15:50:01.057Z"
-        }
-    ]
+  "tracks": [
+    {
+      "id": 1,
+      "title": "Sample Track",
+      "artist": "Unknown",
+      "genre": "Electronic",
+      "duration": 180,
+      "url": "/tracks/sample.mp3"
+    },
+    {
+      "id": 2,
+      "title": "Morning Vibes",
+      "artist": "Chill Beats",
+      "genre": "Ambient",
+      "duration": 240,
+      "url": "/tracks/morning.mp3"
+    },
+    {
+      "id": 3,
+      "title": "Energy Boost",
+      "artist": "Synth Wave",
+      "genre": "Synthwave",
+      "duration": 200,
+      "url": "/tracks/energy.mp3"
+    },
+    {
+      "id": 4,
+      "title": "New Song",
+      "artist": "Artist Name",
+      "genre": "Pop",
+      "duration": 0,
+      "url": ""
+    }
+  ],
+  "playlists": [
+    {
+      "id": 1,
+      "name": "Favorites",
+      "description": "My favorite tracks",
+      "trackIds": [
+        1,
+        2
+      ],
+      "createdAt": "2026-05-24T00:00:00Z"
+    },
+    {
+      "id": 2,
+      "name": "Workout Mix",
+      "description": "High energy tracks",
+      "trackIds": [
+        3
+      ],
+      "createdAt": "2026-05-24T00:00:00Z"
+    },
+    {
+      "id": 3,
+      "name": "My List",
+      "description": "",
+      "trackIds": [
+        1,
+        2
+      ],
+      "createdAt": "2026-05-24T15:50:01.057Z"
+    }
+  ],
+  "playlist_tracks": [
+    {
+      "playlist_id": 1,
+      "track_id": 1
+    },
+    {
+      "playlist_id": 1,
+      "track_id": 2
+    },
+    {
+      "playlist_id": 2,
+      "track_id": 3
+    },
+    {
+      "playlist_id": 3,
+      "track_id": 1
+    },
+    {
+      "playlist_id": 3,
+      "track_id": 2
+    }
+  ]
 }

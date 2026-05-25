@@ -16,6 +16,8 @@ const queueButton = document.getElementById("queueButton");
 const downloadButton = document.getElementById("downloadButton");
 const dropOverlay = document.getElementById("dropOverlay");
 const STORAGE_KEY = "music-player-queue";
+const BACKEND_SEARCH_URL = "/api/search";
+const BACKEND_UPLOAD_URL = "/api/upload";
 let dragCounter = 0;
 
 function sanitizeFileName(text) {
@@ -36,11 +38,11 @@ function searchUploadSongs(query) {
     const lowerQuery = query.toLowerCase();
     return getLibrary().map(song => ({
         ...song,
-        highlightedTitle: highlightText(song.title, query),
-        highlightedArtist: highlightText(song.artist, query),
-        highlightedGenre: highlightText(song.genre, query)
+        highlightedTitle: highlightText(song.title || "", query),
+        highlightedArtist: highlightText(song.artist || "", query),
+        highlightedGenre: highlightText(song.genre || "", query)
     })).filter(song => {
-        return [song.title, song.artist, song.genre].some(field => field.toLowerCase().includes(lowerQuery));
+        return [song.title, song.artist, song.genre].some(field => String(field || "").toLowerCase().includes(lowerQuery));
     });
 }
 
@@ -71,12 +73,35 @@ async function fetchItunesSongs(query) {
     }
 }
 
+async function fetchLibrarySongs(query) {
+    if (!query) return [];
+    try {
+        const response = await fetch(`${BACKEND_SEARCH_URL}?q=${encodeURIComponent(query)}`);
+        const data = await response.json();
+        return (data || []).map(result => ({
+            id: `library-${result.id}`,
+            title: result.title,
+            artist: result.artist,
+            genre: result.genre || "Music",
+            url: result.url,
+            source: "Library",
+            full: Boolean(result.url),
+            highlightedTitle: highlightText(result.title, query),
+            highlightedArtist: highlightText(result.artist, query),
+            highlightedGenre: highlightText(result.genre || "Music", query)
+        }));
+    } catch (error) {
+        console.error("Library search failed:", error);
+        return [];
+    }
+}
+
 function renderSongs(list) {
     songList.innerHTML = "";
     resultCount.textContent = `Showing ${list.length} ${list.length === 1 ? "song" : "songs"}`;
 
     if (!list.length) {
-        songList.innerHTML = `<li class="song-item"><div class="song-meta"><p class="song-title">No matching songs found.</p><p class="song-subtitle">Try another search.</p></div></li>`;
+        songList.innerHTML = `<li class="song-item"><div class="song-meta"><p class="song-title">No full songs found.</p><p class="song-subtitle">Upload audio files or try a different search term.</p></div></li>`;
         return;
     }
 
@@ -86,9 +111,12 @@ function renderSongs(list) {
 
         const meta = document.createElement("div");
         meta.className = "song-meta";
+        const titleText = song.highlightedTitle || song.title || "Unknown title";
+        const artistText = song.highlightedArtist || song.artist || "Unknown artist";
+        const genreText = song.highlightedGenre || song.genre || "Music";
         meta.innerHTML = `
-      <p class="song-title">${song.highlightedTitle || song.title}</p>
-      <p class="song-subtitle">${song.highlightedArtist || song.artist} · ${song.highlightedGenre || song.genre}
+      <p class="song-title">${titleText}</p>
+      <p class="song-subtitle">${artistText} · ${genreText}
         <span class="tag">${song.source || "Upload"}${song.full ? " · Full" : " · Preview"}</span>
       </p>
     `;
@@ -97,8 +125,11 @@ function renderSongs(list) {
         actions.className = "song-actions";
 
         const playButton = document.createElement("button");
-        playButton.textContent = "Play";
-        playButton.addEventListener("click", () => playSong(song));
+        playButton.textContent = song.url ? "Play" : "No audio";
+        playButton.disabled = !song.url;
+        if (song.url) {
+            playButton.addEventListener("click", () => playSong(song));
+        }
 
         const queueButtonItem = document.createElement("button");
         queueButtonItem.textContent = "Queue";
@@ -107,10 +138,15 @@ function renderSongs(list) {
 
         const downloadItem = document.createElement("a");
         downloadItem.className = "download-button";
-        downloadItem.textContent = song.full ? "Download" : "Download Preview";
-        downloadItem.href = song.url;
-        downloadItem.target = "_blank";
-        downloadItem.setAttribute("download", sanitizeFileName(`${song.title}-${song.artist}`) + ".mp3");
+        downloadItem.textContent = song.url ? (song.full ? "Download" : "Download Preview") : "Unavailable";
+        downloadItem.href = song.url || "#";
+        downloadItem.target = song.url ? "_blank" : "";
+        if (song.url) {
+            downloadItem.setAttribute("download", sanitizeFileName(`${song.title}-${song.artist}`) + ".mp3");
+        } else {
+            downloadItem.removeAttribute("download");
+            downloadItem.classList.add("disabled");
+        }
 
         const youtubeLink = document.createElement("a");
         youtubeLink.className = "youtube-button";
@@ -228,22 +264,67 @@ function setDragActive(active) {
     document.body.classList.toggle("dragging", active);
 }
 
+async function uploadFiles(files) {
+    const fileList = Array.from(files || []);
+    if (!fileList.length) return [];
+
+    const formData = new FormData();
+    fileList.forEach(file => {
+        if (file.type.startsWith("audio/")) {
+            formData.append("files", file);
+        }
+    });
+
+    try {
+        const response = await fetch(BACKEND_UPLOAD_URL, {
+            method: "POST",
+            body: formData
+        });
+        if (!response.ok) {
+            console.error("Upload failed", await response.text());
+            return [];
+        }
+        const uploaded = await response.json();
+        return uploaded.map(track => ({
+            ...track,
+            source: "Upload",
+            full: Boolean(track.url),
+            highlightedTitle: highlightText(track.title, ""),
+            highlightedArtist: highlightText(track.artist, ""),
+            highlightedGenre: highlightText(track.genre || "Uploaded", "")
+        }));
+    } catch (error) {
+        console.error("Upload error:", error);
+        return [];
+    }
+}
+
 function handleFiles(files) {
     const fileList = Array.from(files || []);
-    fileList.forEach((file, index) => {
-        if (!file.type.startsWith("audio/")) return;
-        const objectUrl = URL.createObjectURL(file);
-        uploadedSongs.unshift({
-            id: `upload-${Date.now()}-${index}`,
-            title: file.name.replace(/\.[^/.]+$/, ""),
-            artist: "Uploaded",
-            genre: "Uploaded",
-            url: objectUrl,
-            source: "Upload",
-            full: true
+    if (!fileList.length) return;
+
+    uploadFiles(fileList).then(uploaded => {
+        if (uploaded.length) {
+            uploadedSongs.unshift(...uploaded);
+            renderSongs(getLibrary());
+            return;
+        }
+
+        fileList.forEach((file, index) => {
+            if (!file.type.startsWith("audio/")) return;
+            const objectUrl = URL.createObjectURL(file);
+            uploadedSongs.unshift({
+                id: `upload-${Date.now()}-${index}`,
+                title: file.name.replace(/\.[^/.]+$/, ""),
+                artist: "Uploaded",
+                genre: "Uploaded",
+                url: objectUrl,
+                source: "Upload",
+                full: true
+            });
         });
+        renderSongs(getLibrary());
     });
-    renderSongs(getLibrary());
 }
 
 function handleDrop(files) {
@@ -259,12 +340,13 @@ async function performSearch() {
     }
 
     resultCount.textContent = "Loading results...";
-    const [apiResults, uploadResults] = await Promise.all([
+    const [libraryResults, apiResults, uploadResults] = await Promise.all([
+        fetchLibrarySongs(query),
         fetchItunesSongs(query),
         Promise.resolve(searchUploadSongs(query))
     ]);
 
-    renderSongs([...uploadResults, ...apiResults]);
+    renderSongs([...uploadResults, ...libraryResults, ...apiResults]);
 }
 
 function handleUpload(event) {

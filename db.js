@@ -1,11 +1,7 @@
 const path = require('path');
 const fs = require('fs');
-const low = require('lowdb');
-const FileSync = require('lowdb/adapters/FileSync');
 
 const DATA_FILE = path.join(__dirname, 'data.json');
-const adapter = new FileSync(DATA_FILE);
-const db = low(adapter);
 
 const defaultData = {
     tracks: [],
@@ -13,15 +9,26 @@ const defaultData = {
     playlist_tracks: []
 };
 
-if (!fs.existsSync(DATA_FILE)) {
-    fs.writeFileSync(DATA_FILE, JSON.stringify(defaultData, null, 2));
+function ensureDataFile() {
+    if (!fs.existsSync(DATA_FILE)) {
+        fs.writeFileSync(DATA_FILE, JSON.stringify(defaultData, null, 2));
+    }
 }
 
-db.defaults(defaultData).write();
+function loadData() {
+    ensureDataFile();
+    return JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
+}
 
-const raw = JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
-const hasTrackIds = Array.isArray(raw.playlists) && raw.playlists.some(p => Array.isArray(p.trackIds) && p.trackIds.length > 0);
-const hasPlaylistTracks = Array.isArray(raw.playlist_tracks) && raw.playlist_tracks.length > 0;
+function saveData(data) {
+    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+}
+
+const raw = loadData();
+raw.playlists = Array.isArray(raw.playlists) ? raw.playlists : [];
+raw.playlist_tracks = Array.isArray(raw.playlist_tracks) ? raw.playlist_tracks : [];
+const hasTrackIds = raw.playlists.some(p => Array.isArray(p.trackIds) && p.trackIds.length > 0);
+const hasPlaylistTracks = raw.playlist_tracks.length > 0;
 
 if (hasTrackIds && !hasPlaylistTracks) {
     raw.playlists.forEach(playlist => {
@@ -29,8 +36,14 @@ if (hasTrackIds && !hasPlaylistTracks) {
             raw.playlist_tracks.push({ playlist_id: playlist.id, track_id: trackId });
         });
     });
-    fs.writeFileSync(DATA_FILE, JSON.stringify(raw, null, 2));
-    db.set('playlist_tracks', raw.playlist_tracks).write();
+    saveData(raw);
 }
+
+const db = {
+    data: raw,
+    save() {
+        saveData(this.data);
+    }
+};
 
 module.exports = db;
